@@ -125,3 +125,17 @@ class poseDetector:
                     print("Complexité maximale atteinte, réinitialisation à 0")
                     self.model_complexity = 0
                 self.no_detection_counter = 0  # Réinitialiser le compteur après l'ajustement
+
+    def displayBodyAngles(self, img):
+        """Affiche les angles des articulations du corps (ex. coudes, genoux)"""
+        landmarks = {
+            "left_elbow": [11, 13, 15],  # Épaule gauche, coude gauche, poignet gauche
+            "right_elbow": [12, 14, 16],  # Épaule droite, coude droit, poignet droit
+            # Ajoutez plus de points ici si nécessaire
+        }
+
+        for angle_name, points in landmarks.items():
+            angle = self.findAngle(img, points[0], points[1], points[2])
+            if angle is not None:
+                cv2.putText(img, f"{angle_name}: {int(angle)}°", (points[1] - 10, points[2] - 10),
+                            cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 2)
