@@ -36,7 +36,7 @@ class poseDetector:
         self.no_detection_counter = 0
         self.detection_success_counter = 0
         self.reduction_threshold = 5  # Réduction de la complexité après 5 détections réussies
-        self.max_attempts = 3  # Augmentation de la complexité après 3 échecs de détection
+        self.max_attempts = 1  # Augmentation de la complexité après 3 échecs de détection
 
     def findPose(self, img, draw=True):
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
