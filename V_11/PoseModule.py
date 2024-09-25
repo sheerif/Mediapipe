@@ -9,28 +9,34 @@ class poseDetector:
         self.smooth = smooth
         self.detectionCon = detectionCon
         self.trackCon = trackCon
-        self.model_complexity = 1  # Complexité initiale moyenne
+        self.model_complexity = 0  # Complexité initiale
         self.max_complexity = 2  # Complexité maximale du modèle
+        self.min_complexity = 0  # Complexité minimale du modèle
 
-        # Détection de pose
-        self.mpDraw = mp.solutions.drawing_utils
-        self.mpPose = mp.solutions.pose
-        self.pose = self.mpPose.Pose(static_image_mode=self.mode,
-                                     model_complexity=self.model_complexity,
-                                     smooth_landmarks=self.smooth,
-                                     enable_segmentation=self.upBody,
-                                     min_detection_confidence=self.detectionCon,
-                                     min_tracking_confidence=self.trackCon)
+        try:
+            # Détection de pose
+            self.mpDraw = mp.solutions.drawing_utils
+            self.mpPose = mp.solutions.pose
+            self.pose = self.mpPose.Pose(static_image_mode=self.mode,
+                                         model_complexity=self.model_complexity,
+                                         smooth_landmarks=self.smooth,
+                                         enable_segmentation=self.upBody,
+                                         min_detection_confidence=self.detectionCon,
+                                         min_tracking_confidence=self.trackCon)
 
-        # Détection de personnes
-        self.mpObjectron = mp.solutions.object_detection
-        self.objectron = self.mpObjectron.ObjectDetection(min_detection_confidence=self.detectionCon)
+            # Détection de visage à la place de object_detection
+            self.mpFace = mp.solutions.face_detection
+            self.face_detection = self.mpFace.FaceDetection(min_detection_confidence=self.detectionCon)
+
+        except Exception as e:
+            print(f"Erreur lors de l'initialisation de Mediapipe: {e}")
+            raise
 
         self.lmList = []
         self.no_detection_counter = 0
         self.detection_success_counter = 0
         self.reduction_threshold = 5  # Réduction de la complexité après 5 détections réussies
-        self.max_attempts = 3  # Augmentation de la complexité après 3 échecs de détection
+        self.max_attempts = 1  # Augmentation de la complexité après 3 échecs de détection
 
     def findPose(self, img, draw=True):
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -77,9 +83,9 @@ class poseDetector:
             return None
 
     def detectPerson(self, img):
-        """Détecter une personne dans l'image avant d'appliquer la détection de pose"""
+        """Utilise face_detection pour approximer la détection de personnes"""
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        results = self.objectron.process(imgRGB)
+        results = self.face_detection.process(imgRGB)
 
         if results.detections:
             for detection in results.detections:
@@ -96,14 +102,14 @@ class poseDetector:
         return False
 
     def adjustModelComplexity(self):
-        """Ajuster la complexité du modèle de manière adaptative"""
+        """Ajuster la complexité du modèle en fonction de la détection"""
         if self.no_detection_counter >= self.max_attempts:
             if self.model_complexity < self.max_complexity:
                 self.model_complexity += 1
                 print(f"Augmentation de la complexité à {self.model_complexity}")
             else:
-                print("Complexité maximale atteinte, réinitialisation à 0")
-                self.model_complexity = 0
+                print("Complexité maximale atteinte, réinitialisation à la complexité minimale")
+                self.model_complexity = self.min_complexity
             self.no_detection_counter = 0  # Réinitialiser le compteur après l'ajustement
 
         # Recréer l'objet Pose avec la nouvelle complexité
@@ -121,7 +127,7 @@ class poseDetector:
             print(f"Détection réussie pendant {self.detection_success_counter} frames.")
 
             # Réduire la complexité si les détections réussissent plusieurs fois
-            if self.detection_success_counter >= self.reduction_threshold and self.model_complexity > 0:
+            if self.detection_success_counter >= self.reduction_threshold and self.model_complexity > self.min_complexity:
                 self.model_complexity -= 1
                 print(f"Réduction de la complexité à {self.model_complexity} pour optimiser.")
                 self.detection_success_counter = 0  # Réinitialiser le compteur
@@ -133,3 +139,17 @@ class poseDetector:
             # Augmenter la complexité après plusieurs échecs
             self.adjustModelComplexity()
             self.detection_success_counter = 0  # Réinitialiser le compteur de succès
+
+    def displayBodyAngles(self, img):
+        """Affiche les angles des articulations du corps (ex. coudes, genoux)"""
+        landmarks = {
+            "left_elbow": [11, 13, 15],  # Épaule gauche, coude gauche, poignet gauche
+            "right_elbow": [12, 14, 16],  # Épaule droite, coude droit, poignet droit
+            # Ajoutez plus de points ici si nécessaire
+        }
+
+        for angle_name, points in landmarks.items():
+            angle = self.findAngle(img, points[0], points[1], points[2])
+            if angle is not None:
+                cv2.putText(img, f"{angle_name}: {int(angle)}°", (points[1] - 10, points[2] - 10),
+                            cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 2)
