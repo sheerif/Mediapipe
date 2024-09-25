@@ -5,12 +5,20 @@ import cv2
 jpg = '/home/pc-camera/Bureau/Cameras/03_Code_MiniPC/07.jpg'
 img = cv2.imread(jpg)
 
+<<<<<<< HEAD
 # Initialisation du détecteur de pose avec détection de personne
+=======
+# Initialisation du détecteur de pose avec détection de visage/personne
+>>>>>>> 456e81e4dc9cb77117a2b34413ef654e2b0cd5f5
 detector = pm.poseDetector()
 
 # Vérification que l'image a été correctement chargée
 if img is not None:
+<<<<<<< HEAD
     # Étape 1 : Détection de personne
+=======
+    # Étape 1 : Détection de personne (utilise face_detection)
+>>>>>>> 456e81e4dc9cb77117a2b34413ef654e2b0cd5f5
     detection_success = detector.detectPerson(img)
     detector.updateComplexityOnDetection(detection_success)
 

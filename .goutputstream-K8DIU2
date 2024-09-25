@@ -1,7 +1,5 @@
-PROJET DE DETECTION FACIAL VIA L'IA.
-
 Traceback (most recent call last):
   File "/home/pc-camera/Bureau/Cameras/03_Code_MiniPC/Mediapipe_Posture.py", line 15, in <module>
     detector.updateComplexityOnDetection(detection_success)
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'poseDetector' object has no attribute 'updateComplexityOnDetection'
+AttributeError: 'poseDetector' object has no attribute 'updateComplexityOnDetection'. Did you mean: 'updateComplexityOnFrames'?
