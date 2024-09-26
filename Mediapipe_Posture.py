@@ -2,10 +2,10 @@ import PoseModule as pm
 import cv2
 
 # Chargement de l'image
-jpg = '/home/pc-camera/Bureau/Cameras/03_Code_MiniPC/07.jpg'
+jpg = '/home/pc-camera/Bureau/Cameras/03_Code_MiniPC/images/02.jpg'
 img = cv2.imread(jpg)
 
-# Initialisation du détecteur de pose avec détection de visage/personne et main
+# Initialisation du détecteur de pose avec détection de visage/personne et main (grasping)
 detector = pm.poseDetector()
 
 # Vérification que l'image a été correctement chargée
@@ -15,7 +15,10 @@ if img is not None:
 
     # Si une personne est détectée, afficher les angles du corps
     if detection_success:
-        detector.displayBodyAngles(img)
+        if detector.lmList:  # On vérifie que des landmarks sont présents
+            detector.displayBodyAngles(img)
+        else:
+            print("Aucun point de repère (landmarks) détecté pour afficher les angles.")
 
     # Étape 2 : Effectuer la détection de visage après le traitement du modèle de complexité
     face_detected, img = detector.faceDetector(img)

@@ -1,3 +1,4 @@
+landmarks = {
         # Bras
         "left_elbow": [11, 13, 15],    # Épaule gauche, coude gauche, poignet gauche
         "right_elbow": [12, 14, 16],   # Épaule droite, coude droit, poignet droit
@@ -21,3 +22,4 @@
         "right_knee": [24, 26, 28],    # Hanche droite, genou droit, cheville droite
         "left_hip": [11, 23, 25],      # Épaule gauche, hanche gauche, genou gauche
         "right_hip": [12, 24, 26],     # Épaule droite, hanche droite, genou droit
+}
